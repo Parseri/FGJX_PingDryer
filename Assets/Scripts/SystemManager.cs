@@ -22,11 +22,16 @@ public class SystemManager : MonoBehaviour {
     public Text timerText;
     public GameObject deathParticlePrefab;
     private GameObject deathParticle;
+    private float gameCompleteTimer = -1;
+    private float gameEndScale = 1f;
+    public GameObject completePopup;
     void Start() {
         if (instance == null)
             instance = this;
         else
             Destroy(gameObject);
+        if (ball == null)
+            ball = GameObject.FindGameObjectWithTag("Ball");
         livesText.text = "Lives: " + SettingsManager.Instance.Lives;
         gameDeath = false;
         gameComplete = false;
@@ -57,13 +62,42 @@ public class SystemManager : MonoBehaviour {
         continuePopup.SetActive(true);
         continueTimer = 10;
     }
-    public void ContinueClicked(){
+    public void ContinueClicked() {
         SettingsManager.Instance.ContinueGame();
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
+    public void ExitClicked() {
+        SceneManager.LoadScene("MainMenu");
+    }
+    public void RestartClicked() {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
+    public void NextLevelClicked() {
+        if (SceneManager.GetActiveScene().buildIndex+1 < SceneManager.sceneCountInBuildSettings)
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex+1);
+        else
+            SceneManager.LoadScene("MainMenu");
+        completePopup.SetActive(false);
+    }
+    void ShowLevelCompletePopup() {
+        completePopup.SetActive(true);
+    }
+
+    public bool PopupsVisible(){
+        return completePopup.activeSelf || continuePopup.activeSelf;
+    }
     void Update() {
-        if (showContinue) {
-            continueTimer-=Time.deltaTime;
+        if (gameCompleteTimer >= 0) {
+            gameCompleteTimer += Time.deltaTime;
+            if (gameCompleteTimer <= 0.5f) {
+                gameEndScale = Mathf.Lerp(gameEndScale, 0, gameCompleteTimer / 0.5f);
+                ball.transform.localScale = new Vector3(gameEndScale, gameEndScale, 1);
+            } else {
+                gameCompleteTimer = -1;
+                ShowLevelCompletePopup();
+            }
+        } else if (showContinue) {
+            continueTimer -= Time.deltaTime;
             timerText.text = "" + Mathf.Ceil(continueTimer);
             if (continueTimer <= 0) {
                 continuePopup.SetActive(false);
@@ -72,10 +106,12 @@ public class SystemManager : MonoBehaviour {
         } else if (ball != null) {
             if (gameComplete) {
                 ball.GetComponent<Rigidbody2D>().velocity = Vector2.zero;
+                gameCompleteTimer = 0;
+                gameComplete = false;
             } else if (gameDeath) {
                 ball.GetComponent<Rigidbody2D>().velocity = Vector2.zero;
-                deathTime+=Time.deltaTime;
-                if (deathTime > deathTimer){
+                deathTime += Time.deltaTime;
+                if (deathTime > deathTimer) {
                     SceneManager.LoadScene(SceneManager.GetActiveScene().name);
                 }
             }

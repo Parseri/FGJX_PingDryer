@@ -3,14 +3,19 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class SettingsManager : MonoBehaviour {
+public class SettingsManager {
     private static SettingsManager instance = null;
-    public static SettingsManager Instance { get { return instance; } }
+    public static SettingsManager Instance {
+        get {
+            if (instance == null)
+                instance = new SettingsManager();
+            return instance;
+        }
+    }
     int lives;
     public int Lives { get { return lives; } }
-
-    public void StartGame(){
-        SceneManager.LoadScene(1);
+    public SettingsManager() {
+        InitializeGame();
     }
     public void InitializeGame() {
         lives = 3;
@@ -22,17 +27,9 @@ public class SettingsManager : MonoBehaviour {
         lives++;
     }
     void Start() {
-        if (instance == null)
-            instance = this;
-        else
-            Destroy(gameObject);
-		DontDestroyOnLoad(this);
         InitializeGame();
     }
-	public void ContinueGame(){
-		lives = 3;
-	}
-    void Update() {
-
+    public void ContinueGame() {
+        lives = 3;
     }
 }
