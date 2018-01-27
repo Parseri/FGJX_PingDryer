@@ -27,6 +27,8 @@ public class SystemManager : MonoBehaviour {
     public GameObject deathParticlePrefab;
     private GameObject deathParticle;
     private float gameCompleteTimer = -1;
+    private bool newHighScore;
+    public GameObject highScoreStamp;
     private float gameEndScale = 1f;
     
     public GameObject completePopup;
@@ -95,12 +97,17 @@ public class SystemManager : MonoBehaviour {
     }
     void ShowLevelCompletePopup() {
         completePopup.SetActive(true);
+        if (newHighScore)
+        {
+            highScoreStamp.SetActive(true);
+
+        }
     }
 
     public bool PopupsVisible() {
         return completePopup.activeSelf || continuePopup.activeSelf;
     }
-    private string GetMinSec(float time) {
+    public string GetMinSec(float time) {
         string retVal = "";
         int minutes = (int)(time / 60f);
         if (minutes > 0){
@@ -110,9 +117,7 @@ public class SystemManager : MonoBehaviour {
         }
         else retVal += "00:";
         float seconds = time - minutes*60;
-        if (Mathf.RoundToInt(seconds) < 10)
-            retVal += "0";
-        retVal += seconds.ToString("0.00");
+        retVal += seconds.ToString("00.00");
         return retVal;
     }
     void Update() {
@@ -126,7 +131,7 @@ public class SystemManager : MonoBehaviour {
         else if (!timeStored){
             timeStored = true;
             if (!gameDeath)
-                SettingsManager.Instance.PostTime(SceneManager.GetActiveScene().buildIndex, finalTime);
+                newHighScore = SettingsManager.Instance.PostTime(SceneManager.GetActiveScene().buildIndex, finalTime);
         }
         if (gameCompleteTimer >= 0) {
             gameCompleteTimer += Time.deltaTime;
