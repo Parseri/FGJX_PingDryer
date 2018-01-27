@@ -8,6 +8,7 @@ public class Blower : MonoBehaviour {
     public float maxDistance;
     public float maxForce;
     float transitionTimer;
+    public ParticleSystem particles;
     float transitionTime = 0.1f;
     float scale = 1f;
     TransitionMode mode = TransitionMode.Static;
@@ -42,6 +43,8 @@ public class Blower : MonoBehaviour {
             }
         }
         if (Input.GetMouseButtonDown(0) || Input.GetMouseButton(0)) {
+            if (!particles.isPlaying)
+                particles.Play();
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             float rayDistance;
             if (plane.Raycast(ray, out rayDistance)) {
@@ -62,6 +65,7 @@ public class Blower : MonoBehaviour {
                 }
             }
         } else if (Input.GetMouseButtonUp(0)) {
+            particles.Stop();
             transitionTimer = 0;
             mode = TransitionMode.TransitionOut;
         }
