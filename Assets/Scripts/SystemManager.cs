@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -15,6 +16,7 @@ public class SystemManager : MonoBehaviour {
     public GameObject ball;
     public GameObject continuePopup;
     public Text speedRunTime;
+    public Text bestRunTime;
     private float deathTimer = 1.0f;
     private float deathTime;
     private float continueTimer;
@@ -26,8 +28,11 @@ public class SystemManager : MonoBehaviour {
     private GameObject deathParticle;
     private float gameCompleteTimer = -1;
     private float gameEndScale = 1f;
+    
     public GameObject completePopup;
     private bool stopTimer = false;
+    private bool timeStored = false;
+    private float finalTime;
     void Start() {
         if (instance == null)
             instance = this;
@@ -35,11 +40,12 @@ public class SystemManager : MonoBehaviour {
             Destroy(gameObject);
         if (ball == null)
             ball = GameObject.FindGameObjectWithTag("Ball");
-        livesText.text = "Lives: " + SettingsManager.Instance.Lives;
+        livesText.text = "X " + SettingsManager.Instance.Lives;
         gameDeath = false;
         gameComplete = false;
         showContinue = false;
         startTime = -1;
+        bestRunTime.text = "Best: "+ GetMinSec(SettingsManager.Instance.GetBestTime(SceneManager.GetActiveScene().buildIndex));
     }
 
     public void WinGame() {
@@ -53,6 +59,7 @@ public class SystemManager : MonoBehaviour {
         deathParticle = Instantiate(deathParticlePrefab, ball.transform.position, Quaternion.identity);
         ball.SetActive(false);
         if (SettingsManager.Instance.Lives <= 0) {
+            gameDeath = true;
             ShowContinue();
         } else {
             gameDeath = true;
@@ -73,6 +80,7 @@ public class SystemManager : MonoBehaviour {
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
     public void ExitClicked() {
+        SettingsManager.Instance.ContinueGame();
         SceneManager.LoadScene("MainMenu");
     }
     public void RestartClicked() {
@@ -104,14 +112,21 @@ public class SystemManager : MonoBehaviour {
         float seconds = time - minutes*60;
         if (Mathf.RoundToInt(seconds) < 10)
             retVal += "0";
-        retVal += Mathf.RoundToInt(seconds*100)/100f;
+        retVal += seconds.ToString("0.00");
         return retVal;
     }
     void Update() {
         if (startTime < 0)
             startTime = Time.realtimeSinceStartup;
         else if (!stopTimer){
-            speedRunTime.text = "Time: " + GetMinSec(Time.realtimeSinceStartup - startTime);
+
+            finalTime = Time.realtimeSinceStartup - startTime;
+            speedRunTime.text = "Time: " + GetMinSec(finalTime);
+        }
+        else if (!timeStored){
+            timeStored = true;
+            if (!gameDeath)
+                SettingsManager.Instance.PostTime(SceneManager.GetActiveScene().buildIndex, finalTime);
         }
         if (gameCompleteTimer >= 0) {
             gameCompleteTimer += Time.deltaTime;
