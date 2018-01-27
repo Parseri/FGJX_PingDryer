@@ -15,6 +15,7 @@ public class SystemManager : MonoBehaviour {
     public bool GameDeath { get { return gameDeath; } }
     public GameObject ball;
     public GameObject continuePopup;
+    public AudioSource completePopupAudio;
     public Text speedRunTime;
     public Text bestRunTime;
     private float deathTimer = 1.0f;
@@ -30,7 +31,7 @@ public class SystemManager : MonoBehaviour {
     private bool newHighScore;
     public GameObject highScoreStamp;
     private float gameEndScale = 1f;
-    
+
     public GameObject completePopup;
     private bool stopTimer = false;
     private bool timeStored = false;
@@ -47,7 +48,7 @@ public class SystemManager : MonoBehaviour {
         gameComplete = false;
         showContinue = false;
         startTime = -1;
-        bestRunTime.text = "Best: "+ GetMinSec(SettingsManager.Instance.GetBestTime(SceneManager.GetActiveScene().buildIndex));
+        bestRunTime.text = "Best: " + GetMinSec(SettingsManager.Instance.GetBestTime(SceneManager.GetActiveScene().buildIndex));
     }
 
     public void WinGame() {
@@ -97,10 +98,9 @@ public class SystemManager : MonoBehaviour {
     }
     void ShowLevelCompletePopup() {
         completePopup.SetActive(true);
-        if (newHighScore)
-        {
+        completePopupAudio.Play();
+        if (newHighScore) {
             highScoreStamp.SetActive(true);
-
         }
     }
 
@@ -110,25 +110,23 @@ public class SystemManager : MonoBehaviour {
     public string GetMinSec(float time) {
         string retVal = "";
         int minutes = (int)(time / 60f);
-        if (minutes > 0){
+        if (minutes > 0) {
             if (minutes < 10)
                 retVal += "0";
             retVal += minutes + ":";
-        }
-        else retVal += "00:";
-        float seconds = time - minutes*60;
+        } else retVal += "00:";
+        float seconds = time - minutes * 60;
         retVal += seconds.ToString("00.00");
         return retVal;
     }
     void Update() {
         if (startTime < 0)
             startTime = Time.realtimeSinceStartup;
-        else if (!stopTimer){
+        else if (!stopTimer) {
 
             finalTime = Time.realtimeSinceStartup - startTime;
             speedRunTime.text = "Time: " + GetMinSec(finalTime);
-        }
-        else if (!timeStored){
+        } else if (!timeStored) {
             timeStored = true;
             if (!gameDeath)
                 newHighScore = SettingsManager.Instance.PostTime(SceneManager.GetActiveScene().buildIndex, finalTime);
