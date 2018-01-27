@@ -16,6 +16,7 @@ public class SettingsManager {
     public int Lives { get { return lives; } }
     public SettingsManager() {
         InitializeGame();
+        Application.targetFrameRate = 60;
     }
     public void InitializeGame() {
         lives = 3;

@@ -14,17 +14,20 @@ public class SystemManager : MonoBehaviour {
     public bool GameDeath { get { return gameDeath; } }
     public GameObject ball;
     public GameObject continuePopup;
+    public Text speedRunTime;
     private float deathTimer = 1.0f;
     private float deathTime;
     private float continueTimer;
     public Text livesText;
     private bool showContinue;
+    private float startTime = -1;
     public Text timerText;
     public GameObject deathParticlePrefab;
     private GameObject deathParticle;
     private float gameCompleteTimer = -1;
     private float gameEndScale = 1f;
     public GameObject completePopup;
+    private bool stopTimer = false;
     void Start() {
         if (instance == null)
             instance = this;
@@ -36,13 +39,16 @@ public class SystemManager : MonoBehaviour {
         gameDeath = false;
         gameComplete = false;
         showContinue = false;
+        startTime = -1;
     }
 
     public void WinGame() {
         gameComplete = true;
+        stopTimer = true;
     }
 
     public void KillPlayer() {
+        stopTimer = true;
         SettingsManager.Instance.AddDeath();
         deathParticle = Instantiate(deathParticlePrefab, ball.transform.position, Quaternion.identity);
         ball.SetActive(false);
@@ -73,8 +79,8 @@ public class SystemManager : MonoBehaviour {
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
     public void NextLevelClicked() {
-        if (SceneManager.GetActiveScene().buildIndex+1 < SceneManager.sceneCountInBuildSettings)
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex+1);
+        if (SceneManager.GetActiveScene().buildIndex + 1 < SceneManager.sceneCountInBuildSettings)
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
         else
             SceneManager.LoadScene("MainMenu");
         completePopup.SetActive(false);
@@ -83,10 +89,30 @@ public class SystemManager : MonoBehaviour {
         completePopup.SetActive(true);
     }
 
-    public bool PopupsVisible(){
+    public bool PopupsVisible() {
         return completePopup.activeSelf || continuePopup.activeSelf;
     }
+    private string GetMinSec(float time) {
+        string retVal = "";
+        int minutes = (int)(time / 60f);
+        if (minutes > 0){
+            if (minutes < 10)
+                retVal += "0";
+            retVal += minutes + ":";
+        }
+        else retVal += "00:";
+        float seconds = time - minutes*60;
+        if (Mathf.RoundToInt(seconds) < 10)
+            retVal += "0";
+        retVal += Mathf.RoundToInt(seconds*100)/100f;
+        return retVal;
+    }
     void Update() {
+        if (startTime < 0)
+            startTime = Time.realtimeSinceStartup;
+        else if (!stopTimer){
+            speedRunTime.text = "Time: " + GetMinSec(Time.realtimeSinceStartup - startTime);
+        }
         if (gameCompleteTimer >= 0) {
             gameCompleteTimer += Time.deltaTime;
             if (gameCompleteTimer <= 0.5f) {
