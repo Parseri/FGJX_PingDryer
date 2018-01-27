@@ -59,7 +59,7 @@ public class SystemManager : MonoBehaviour {
         stopTimer = true;
         SettingsManager.Instance.AddDeath();
         deathParticle = Instantiate(deathParticlePrefab, ball.transform.position, Quaternion.identity);
-        ball.SetActive(false);
+        ball.GetComponent<SpriteRenderer>().enabled = false;
         if (SettingsManager.Instance.Lives <= 0) {
             gameDeath = true;
             ShowContinue();
@@ -72,7 +72,7 @@ public class SystemManager : MonoBehaviour {
     }
 
     void ShowContinue() {
-        livesText.text = "Lives: " + SettingsManager.Instance.Lives;
+        livesText.text = "X " + SettingsManager.Instance.Lives;
         showContinue = true;
         continuePopup.SetActive(true);
         continueTimer = 10;

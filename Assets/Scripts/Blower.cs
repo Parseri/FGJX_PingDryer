@@ -9,6 +9,11 @@ public class Blower : MonoBehaviour {
     public float maxForce;
     float transitionTimer;
     public ParticleSystem particles;
+    public AudioSource blowLoop;
+    public AudioSource[] blowStart;
+    private float blowTimer = -1;
+    private bool soundFadeOut = false;
+    public float startSoundCooldown = -1;
     float transitionTime = 0.1f;
     float scale = 1f;
     TransitionMode mode = TransitionMode.Static;
@@ -42,9 +47,29 @@ public class Blower : MonoBehaviour {
                 }
             }
         }
+        if (startSoundCooldown >= 0) {
+            startSoundCooldown += Time.deltaTime;
+            if (startSoundCooldown >= 0.5f)
+                startSoundCooldown = -1;
+        }
+
         if (Input.GetMouseButtonDown(0) || Input.GetMouseButton(0)) {
             if (!particles.isPlaying)
                 particles.Play();
+            if (Input.GetMouseButtonDown(0)) {
+                if (startSoundCooldown < 0) {
+                    blowStart[UnityEngine.Random.Range(0, blowStart.Length)].Play();
+                    blowTimer = 0;
+                    soundFadeOut = false;
+                }
+                blowLoop.Play();
+            }
+
+            blowTimer += Time.deltaTime;
+            blowLoop.volume = Mathf.Lerp(blowLoop.volume, 1.0f, blowTimer / 0.5f);
+
+            if (blowTimer >= 0.5f)
+                blowTimer = -1;
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             float rayDistance;
             if (plane.Raycast(ray, out rayDistance)) {
@@ -68,6 +93,18 @@ public class Blower : MonoBehaviour {
             particles.Stop();
             transitionTimer = 0;
             mode = TransitionMode.TransitionOut;
+            soundFadeOut = true;
+            blowTimer = 0;
+        }
+        if (soundFadeOut) {
+            blowTimer += Time.deltaTime;
+            blowLoop.volume = Mathf.Lerp(blowLoop.volume, 0f, blowTimer / 0.5f);
+
+            if (blowTimer >= 0.5f) {
+                soundFadeOut = false;
+                blowTimer = -1;
+            }
         }
     }
 }
+
