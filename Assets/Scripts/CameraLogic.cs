@@ -11,8 +11,9 @@ public class CameraLogic : MonoBehaviour {
     }
 
     void Update() {
-        if (ballTransform.position.x > transform.position.x && !SystemManager.Instance.GameComplete && !SystemManager.Instance.GameDeath)
+        if (ballTransform.position.x > transform.position.x && !SystemManager.Instance.GameComplete && !SystemManager.Instance.GameDeath) {
             transform.position = new Vector3(ballTransform.position.x, transform.position.y, transform.position.z);
+        }
         var pos = Camera.main.ScreenToWorldPoint(new Vector3(0, Screen.height*0.5f, 0));
         doomPiece.position = new Vector3(pos.x, doomPiece.position.y, doomPiece.position.z);
     }
