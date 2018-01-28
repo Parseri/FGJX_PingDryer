@@ -35,11 +35,12 @@ public class Player : MonoBehaviour {
         int random = UnityEngine.Random.Range(0, deathAudio.Length);
         deathAudio[random].Play();
         SystemManager.Instance.KillPlayer();
+        GetComponent<Collider2D>().enabled = false;
     }
 
     void Update() {
 
-        if (transform.position.x <= Camera.main.ScreenToWorldPoint(new Vector2(0, Screen.height * 0.5f)).x)
+        if (GetComponent<Collider2D>().enabled && transform.position.x <= Camera.main.ScreenToWorldPoint(new Vector2(0, Screen.height * 0.5f)).x)
             Kill();
     }
 }

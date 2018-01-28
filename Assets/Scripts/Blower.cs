@@ -29,7 +29,11 @@ public class Blower : MonoBehaviour {
         transform.localScale = new Vector3(scale, scale, 1);
     }
     void Update() {
-        if (SystemManager.Instance.PopupsVisible()) return;
+        if (SystemManager.Instance.PopupsVisible()) {
+            particles.Stop();
+            GetComponent<SpriteRenderer>().enabled = false;
+            return;
+        }
         if (mode != TransitionMode.Static) {
             transitionTimer += Time.deltaTime;
             if (mode == TransitionMode.TransitionIn) {
